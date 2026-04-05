@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration — EcoleApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0E1117;--surface:#161B27;--surface2:#1E2535;--surface3:#252D40;
+  --border:#2A3349;--border2:#374160;
+  --accent:#4F8EF7;--accent2:#7B6CF6;--green:#22C55E;--red:#F43F5E;--amber:#F59E0B;
+  --text:#E2E8F0;--text-dim:#7D8FAF;--text-muted:#4A5568;
+  --radius:8px;--mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;height:52px;
+}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header h1{font-size:.95rem;font-weight:700;}
+.header-sub{font-size:.7rem;color:var(--text-muted);font-family:var(--mono);}
+.close-btn{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text-dim);font-size:.8rem;padding:6px 14px;cursor:pointer;font-family:var(--sans);transition:all .15s;
+}
+.close-btn:hover{border-color:var(--border2);color:var(--text);}
+
+.container{max-width:800px;margin:0 auto;padding:20px 20px 80px;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;background:var(--surface);}
+.tab{
+  flex:1;padding:9px 12px;border:none;background:transparent;color:var(--text-dim);
+  font-family:var(--sans);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .15s;text-align:center;
+  border-right:1px solid var(--border);
+}
+.tab:last-child{border-right:none;}
+.tab:hover{color:var(--text);background:var(--surface2);}
+.tab.active{background:rgba(79,142,247,.1);color:var(--accent);font-weight:600;}
+
+/* SECTIONS */
+.section{display:none;animation:up .2s ease;}
+.section.active{display:block;}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;}
+.panel-head{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.panel-head .cnt{margin-left:auto;font-family:var(--mono);font-size:.75rem;color:var(--accent);background:rgba(79,142,247,.1);padding:2px 8px;border-radius:4px;}
+
+.add-row{display:flex;gap:8px;margin-bottom:12px;}
+.add-input{
+  flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);
+  background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:.85rem;
+  outline:none;transition:border-color .15s;
+}
+.add-input:focus{border-color:var(--accent);}
+.add-btn{
+  padding:9px 16px;border:none;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:var(--sans);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.add-btn:hover{filter:brightness(1.1);}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:20px;
+  padding:4px 12px 4px 14px;font-family:var(--mono);font-size:.8rem;color:var(--text-dim);
+}
+.chip:hover{border-color:var(--border3);color:var(--text);}
+.chip-x{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.85rem;padding:0;display:flex;align-items:center;transition:color .15s;}
+.chip-x:hover{color:var(--red);}
+.empty{font-size:.78rem;color:var(--text-muted);font-style:italic;padding:8px 0;}
+
+textarea{
+  width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius);
+  background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:.82rem;
+  resize:vertical;outline:none;transition:border-color .15s;margin-bottom:8px;
+}
+textarea:focus{border-color:var(--accent);}
+
+/* JSON */
+.json-box{
+  background:#0A0E17;border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;font-family:var(--mono);font-size:.72rem;color:#7CCFFF;
+  max-height:280px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:10px;
+}
+.info-box{
+  background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius);
+  padding:12px 14px;font-size:.78rem;color:var(--amber);line-height:1.6;margin-bottom:12px;
+}
+
+/* SAVE BAR */
+.save-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:10px 20px;display:flex;gap:10px;max-width:800px;margin:0 auto;
+}
+.save-bar-inner{display:flex;gap:10px;width:100%;max-width:800px;margin:0 auto;}
+.save-btn{
+  flex:1;padding:11px;border:none;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:var(--sans);font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.save-btn:hover{filter:brightness(1.1);}
+.dl-btn{
+  padding:11px 18px;border:1px solid var(--border2);border-radius:var(--radius);
+  background:transparent;color:var(--text-dim);font-family:var(--sans);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.dl-btn:hover{border-color:var(--border3);color:var(--text);background:var(--surface2);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:70px;right:20px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:10px 16px;font-size:.82rem;font-family:var(--mono);
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transform:translateY(20px);opacity:0;transition:all .25s;z-index:999;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:rgba(34,197,94,.3);color:var(--green);}
+.toast.err{border-color:rgba(244,63,94,.3);color:var(--red);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div style="width:28px;height:28px;background:linear-gradient(135deg,#4F8EF7,#7B6CF6);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;font-family:var(--mono);">EA</div>
+    <div>
+      <div class="header h1" style="font-size:.92rem;font-weight:700;">Administration</div>
+      <div class="header-sub">Gestion des listes de mots</div>
+    </div>
+  </div>
+  <button class="close-btn" onclick="window.close()">✕ Fermer</button>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('semaine',this)">🗓 Semaine</button>
+    <button class="tab" onclick="showTab('ecole',this)">🏫 École</button>
+    <button class="tab" onclick="showTab('outils',this)">🛠 Mots outils</button>
+    <button class="tab" onclick="showTab('export',this)">⬡ Export JSON</button>
+  </div>
+
+  <!-- SEMAINE -->
+  <div class="section active" id="tab-semaine">
+    <div class="panel">
+      <div class="panel-head">Ajouter un mot <span class="cnt" id="cnt-semaine">0</span></div>
+      <div class="add-row">
+        <input type="text" class="add-input" id="inp-semaine" placeholder="mot à ajouter…"
+          autocorrect="off" autocapitalize="none" spellcheck="false"
+          onkeydown="if(event.key==='Enter') add('semaine')">
+        <button class="add-btn" onclick="add('semaine')">+ Ajouter</button>
+      </div>
+      <div class="chips" id="chips-semaine"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">Import en masse</div>
+      <textarea id="bulk-semaine" placeholder="maison, jardin, soleil&#10;famille&#10;école, cahier"></textarea>
+      <button class="add-btn" onclick="bulk('semaine')">Importer</button>
+    </div>
+  </div>
+
+  <!-- ÉCOLE -->
+  <div class="section" id="tab-ecole">
+    <div class="panel">
+      <div class="panel-head">Ajouter un mot <span class="cnt" id="cnt-ecole">0</span></div>
+      <div class="add-row">
+        <input type="text" class="add-input" id="inp-ecole" placeholder="mot à ajouter…"
+          autocorrect="off" autocapitalize="none" spellcheck="false"
+          onkeydown="if(event.key==='Enter') add('ecole')">
+        <button class="add-btn" onclick="add('ecole')">+ Ajouter</button>
+      </div>
+      <div class="chips" id="chips-ecole"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">Import en masse</div>
+      <textarea id="bulk-ecole" placeholder="maison, jardin, soleil&#10;famille&#10;école, cahier"></textarea>
+      <button class="add-btn" onclick="bulk('ecole')">Importer</button>
+    </div>
+  </div>
+
+  <!-- OUTILS -->
+  <div class="section" id="tab-outils">
+    <div class="panel">
+      <div class="panel-head">Ajouter un mot <span class="cnt" id="cnt-outils">0</span></div>
+      <div class="add-row">
+        <input type="text" class="add-input" id="inp-outils" placeholder="mot à ajouter…"
+          autocorrect="off" autocapitalize="none" spellcheck="false"
+          onkeydown="if(event.key==='Enter') add('outils')">
+        <button class="add-btn" onclick="add('outils')">+ Ajouter</button>
+      </div>
+      <div class="chips" id="chips-outils"></div>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="section" id="tab-export">
+    <div class="info-box">
+      ⚡ Télécharge le fichier <code>data.json</code> généré ci-dessous, puis remplace-le dans ton dépôt Netlify (glisser-déposer le dossier complet sur <strong>netlify.com/drop</strong>).
+    </div>
+    <div class="panel">
+      <div class="panel-head">Contenu data.json</div>
+      <div class="json-box" id="json-preview"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="add-btn" onclick="copyJSON()" style="flex:1">⎘ Copier</button>
+        <button class="add-btn" onclick="dlJSON()" style="flex:1;background:linear-gradient(135deg,var(--green),#059669)">⬇ Télécharger</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div style="position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 20px;">
+  <div style="display:flex;gap:10px;max-width:800px;margin:0 auto;">
+    <button class="save-btn" onclick="save()">💾 Enregistrer &amp; exporter</button>
+    <button class="dl-btn" onclick="dlJSON()">⬇ data.json</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let D={motsSemaine:[],motsEcole:[],motsOutils:[]};
+
+const KEYS={semaine:'motsSemaine',ecole:'motsEcole',outils:'motsOutils'};
+
+async function init(){
+  try{
+    const r=await fetch('data.json?t='+Date.now());
+    if(!r.ok) throw 0;
+    D=await r.json();
+  }catch{
+    const s=localStorage.getItem('ecole_data');
+    if(s) try{D=JSON.parse(s);}catch{}
+  }
+  render();
+}
+
+function render(){
+  ['semaine','ecole','outils'].forEach(k=>{
+    const lk=KEYS[k];
+    const list=D[lk]||[];
+    document.getElementById('cnt-'+k).textContent=list.length;
+    const c=document.getElementById('chips-'+k);
+    if(!list.length){ c.innerHTML='<span class="empty">Aucun mot</span>'; return; }
+    c.innerHTML=list.map((w,i)=>`
+      <div class="chip">${esc(w)}<button class="chip-x" onclick="rm('${lk}',${i})">✕</button></div>
+    `).join('');
+  });
+  updateJSON();
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function add(k){
+  const lk=KEYS[k];
+  const inp=document.getElementById('inp-'+k);
+  const w=inp.value.trim(); if(!w) return;
+  if((D[lk]||[]).some(x=>x.toLowerCase()===w.toLowerCase())){
+    toast('⚠ Mot déjà présent','err'); inp.value=''; return;
+  }
+  D[lk]=[...(D[lk]||[]),w]; inp.value=''; render();
+  toast(`✓ "${w}" ajouté`,'ok');
+}
+
+function bulk(k){
+  const lk=KEYS[k];
+  const raw=document.getElementById('bulk-'+k).value;
+  const words=raw.split(/[\n,]+/).map(w=>w.trim()).filter(Boolean);
+  let n=0;
+  words.forEach(w=>{ if(!(D[lk]||[]).some(x=>x.toLowerCase()===w.toLowerCase())){ D[lk]=[...(D[lk]||[]),w]; n++; } });
+  document.getElementById('bulk-'+k).value=''; render();
+  toast(`✓ ${n} mot(s) importé(s)`,'ok');
+}
+
+function rm(lk,i){ D[lk].splice(i,1); render(); }
+
+function save(){
+  localStorage.setItem('ecole_data',JSON.stringify(D));
+  dlJSON();
+  toast('💾 Sauvegardé — remplace data.json sur Netlify','ok');
+}
+
+function updateJSON(){ document.getElementById('json-preview').textContent=JSON.stringify(D,null,2); }
+
+async function copyJSON(){
+  try{ await navigator.clipboard.writeText(JSON.stringify(D,null,2)); toast('⎘ Copié !','ok'); }
+  catch{ toast('Erreur copie','err'); }
+}
+
+function dlJSON(){
+  const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download='data.json'; a.click(); URL.revokeObjectURL(a.href);
+  toast('⬇ Téléchargement démarré','ok');
+}
+
+function showTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='export') updateJSON();
+}
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+init();
+</script>
+</body>
+</html>
